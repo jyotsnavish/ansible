@@ -1,0 +1,19 @@
+---
+# tasks file for signalfx
+- name: Install sfx linux
+  shell : |
+    curl -sSL https://dl.signalfx.com/splunk-otel-collector.sh > /tmp/splunk-otel-collector.sh && \
+    sudo sh /tmp/splunk-otel-collector.sh --realm {{ signalfx.realm }} -- {{ signalfx.access_token}} --mode agent
+
+    systemctl start splunk-otel-collector
+  when: ansible_os_family != 'Windows'
+
+- name: Install Sfx windows
+  win_shell : |
+    & {Set-ExecutionPolicy Bypass -Scope Process -Force; $script = ((New-Object System.Net.WebClient).DownloadString('https://dl.signalfx.com/splunk-otel-collector.ps1')); $params = @{access_token = "{{ signalfx.access_token }}"; realm = " {{ signalfx.realm }} "; mode = "agent"}; Invoke-Command -ScriptBlock ([scriptblock]::Create(". {$script} $(&{$args} @params)"))}
+
+    Stop-Service splunk-otel-collector
+    Start-Service splunk-otel-collector
+
+  when: ansible_os_family == 'Windows'
+

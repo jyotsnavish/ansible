@@ -1,0 +1,7 @@
+---
+- name: Install Signalfx agent
+  hosts: windows
+  remote_user: root
+  vars_files: vars.yaml
+  roles:
+    - role: signalfx
